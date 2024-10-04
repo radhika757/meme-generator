@@ -1,0 +1,10 @@
+.navbarContainer {
+  margin: 5px 0px;
+  width: 100%;
+  background-color: rgba(220, 115, 230, 0.965);
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 20px;
+}
