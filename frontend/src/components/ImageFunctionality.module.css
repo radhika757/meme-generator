@@ -1,0 +1,189 @@
+.memeEditor {
+  background-color: white;
+  margin: 15px 20px;
+  padding: 25px 20px;
+  border-radius: 12px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
+    rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+}
+
+.imageContainer {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.memeImage,
+.memecanvas {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.deleteImageButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: #ff4136;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.textBox {
+  position: absolute;
+  cursor: move;
+}
+
+.editorControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.controlButton {
+  background-color: #8a2be2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.controlButton:hover {
+  background-color: #7b1fa2;
+}
+
+.controlButton:active {
+  background-color: #ff69b4;
+}
+
+.helperText {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.textEditor {
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.textInput {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px solid #d1c4e9;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.fontSizeControl,
+.colorPicker {
+  margin-bottom: 0.5rem;
+}
+
+.controlLabel {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #333;
+}
+
+.slider {
+  width: 100%;
+}
+
+.colorInput {
+  width: 100%;
+  height: 40px;
+}
+
+.deleteTextButton {
+  background-color: #ff4136;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 0.75rem;
+  cursor: pointer;
+}
+
+/*  */
+.fileNameInput {
+  margin-bottom: 1rem;
+}
+
+.actionButtons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.generate {
+  background-color: #2ecc40;
+  color: white;
+}
+
+.download {
+  background-color: #0074d9;
+  color: white;
+}
+
+.whatsapp {
+  background-color: #25d366;
+  color: white;
+}
+
+.instagram {
+  background-color: #e1306c;
+  color: white;
+}
+
+.facebook {
+  background-color: #3b5998;
+  color: white;
+}
+
+.actionButton:hover {
+  opacity: 0.9;
+}
+
+.icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0.5rem;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+
+  .actionButton {
+    width: 100%;
+  }
+}

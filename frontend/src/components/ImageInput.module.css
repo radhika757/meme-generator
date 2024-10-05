@@ -1,0 +1,74 @@
+.InputContainer {
+  background-color: #ffffff;
+  margin: 15px 20px;
+  padding: 25px 20px;
+  border-radius: 12px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
+    rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+}
+
+.label {
+  font-size: 20px;
+  font-weight: bold;
+  color: rgba(17, 11, 11, 0.682);
+  margin-bottom: 15px;
+}
+
+.input {
+  border: 2px solid #d1c4e9;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 20px;
+}
+
+.input:hover {
+  border: 2px solid #d1c4e9;
+}
+.suggestedImages {
+  display: flex;
+  flex-direction: column;
+  margin: 15px 0;
+}
+
+.images {
+  height: 15em;
+  width: 15em;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  border: 2px solid #d1c4e9;
+  object-fit: contain;
+}
+
+.allImages {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.images img {
+  max-width: 15em;
+  max-height: 15em;
+  object-fit: cover;
+  transition: border-color 0.3s;
+}
+
+.images:hover {
+  border: 2px solid;
+  border-color: #8a2be2 !important;
+}
+
+.loadMore {
+  display: flex;
+  justify-content: center;
+}
+
+.loadMore button{
+    padding: 1rem 1.5rem !important;
+    
+}
+
+.loadMore button:hover{
+    border-color: #8a2be2 !important;
+    color: #8a2be2 !important;
+}
