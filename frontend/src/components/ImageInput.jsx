@@ -9,7 +9,7 @@ import what from "../dummyimages/what.jpeg";
 
 import { Button, Input } from "antd";
 
-const ImageInput = (image, setImage) => {
+const ImageInput = ({ setImage }) => {
   //temp
   const defaultImages = [
     {
@@ -51,15 +51,17 @@ const ImageInput = (image, setImage) => {
 
   const onSelectFile = (e) => {
     if (e.target.files && e.target.files.length > 0) {
+      console.log(e.target);
+
       const reader = new FileReader();
       reader.addEventListener("load", () => setImage(reader.result));
       reader.readAsDataURL(e.target.files[0]);
     }
   };
 
-  const handleLoadMoreImages = () =>{
+  const handleLoadMoreImages = () => {
     //get more images from server
-  }
+  };
 
   return (
     <div className={styles.InputContainer}>

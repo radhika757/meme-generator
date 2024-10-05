@@ -21,7 +21,7 @@ function App() {
   return (
     <div className="big-container">
       <Navbar image={image} setImage={setImage} />
-      <ImageInput setImage={setImage} image={image} />
+      <ImageInput setImage={setImage} />
       {image && (
         <ImageFunctionality
           image={image}

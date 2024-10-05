@@ -1,4 +1,5 @@
 .InputContainer {
+  background-color: #ffffff;
   margin: 15px 20px;
   padding: 25px 20px;
   border-radius: 12px;
@@ -14,13 +15,15 @@
 }
 
 .input {
-  border: 2px solid;
-  border-color: rgb(164, 59, 164);
+  border: 2px solid #d1c4e9;
   border-radius: 5px;
   padding: 10px;
   margin-top: 20px;
 }
 
+.input:hover {
+  border: 2px solid #d1c4e9;
+}
 .suggestedImages {
   display: flex;
   flex-direction: column;
@@ -33,7 +36,7 @@
   display: flex;
   flex-direction: row;
   overflow: hidden;
-  border: 1px solid gainsboro;
+  border: 2px solid #d1c4e9;
   object-fit: contain;
 }
 
@@ -47,15 +50,25 @@
   max-width: 15em;
   max-height: 15em;
   object-fit: cover;
+  transition: border-color 0.3s;
 }
 
 .images:hover {
   border: 2px solid;
-  border-color: rgb(214, 101, 120) !important;
-  /* transition: 2s linear; */
+  border-color: #8a2be2 !important;
 }
 
 .loadMore {
   display: flex;
   justify-content: center;
+}
+
+.loadMore button{
+    padding: 1rem 1.5rem !important;
+    
+}
+
+.loadMore button:hover{
+    border-color: #8a2be2 !important;
+    color: #8a2be2 !important;
 }
