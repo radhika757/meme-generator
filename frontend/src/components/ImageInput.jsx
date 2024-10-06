@@ -1,53 +1,26 @@
+import { useState, useEffect } from "react";
 import styles from "./ImageInput.module.css";
-import cat from "../dummyimages/cat.jpeg";
-import child from "../dummyimages/child.jpeg";
-import duck from "../dummyimages/duck.jpeg";
-import exuse from "../dummyimages/excuseme.jpeg";
-import oops from "../dummyimages/oops.jpeg";
-import sadfrog from "../dummyimages/sadfrog.jpeg";
-import what from "../dummyimages/what.jpeg";
 
+import axios from "axios";
 import { Button, Input } from "antd";
 
 const ImageInput = ({ setImage }) => {
-  //temp
-  const defaultImages = [
-    {
-      id: 1,
-      src: cat,
-      alt: "Default Image 1",
-    },
-    {
-      id: 2,
-      src: child,
-      alt: "Default Image 2",
-    },
-    {
-      id: 3,
-      src: duck,
-      alt: "Default Image 3",
-    },
-    {
-      id: 4,
-      src: exuse,
-      alt: "Default Image 4",
-    },
-    {
-      id: 5,
-      src: oops,
-      alt: "Default Image 4",
-    },
-    {
-      id: 6,
-      src: sadfrog,
-      alt: "Default Image 4",
-    },
-    {
-      id: 7,
-      src: what,
-      alt: "Default Image 4",
-    },
-  ];
+  const [suggestedImages, setSuggestedImages] = useState(null);
+
+  useEffect(() => {
+    const fetchSuggestedImages = async () => {
+      try {
+        const result = await axios.get(
+          "http://localhost:3000/topSuggestedImages"
+        );
+        setSuggestedImages(result.data);
+      } catch (err) {
+        console.error("Error fetching suggested images:", err);
+      }
+    };
+
+    fetchSuggestedImages();
+  }, []);
 
   const onSelectFile = (e) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -78,15 +51,16 @@ const ImageInput = ({ setImage }) => {
 
       <div className={styles.suggestedImages}>
         <div className={styles.allImages}>
-          {defaultImages.map((img) => (
-            <Button
-              key={img.id}
-              className={styles.images}
-              onClick={() => setImage(img.src)}
-            >
-              <img src={img.src} alt={img.alt} />
-            </Button>
-          ))}
+          {suggestedImages &&
+            Object.values(suggestedImages)?.map((img) => (
+              <Button
+                key={img.id}
+                className={styles.images}
+                onClick={() => setImage(img.imgName)}
+              >
+                <img src={`../dummyimages/${img.imgName}`} alt={img.imgName} />
+              </Button>
+            ))}
         </div>
         <div className={styles.loadMore}>
           <Button onClick={handleLoadMoreImages}>Load More</Button>

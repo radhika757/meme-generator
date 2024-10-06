@@ -11,7 +11,7 @@ import {
   Crop as CropIcon,
   Save,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export const ImageFunctionality = (
   image,
@@ -33,9 +33,11 @@ export const ImageFunctionality = (
   fileName,
   setFileName,
   containerRef,
-  imgRef,
-  canvasRef
+  imgRef
+  //   canvasRef
 ) => {
+  const canvasRef = useRef(null);
+
   const deleteImage = () => {
     setImage(null);
     setTextBoxes([]);
@@ -262,26 +264,35 @@ export const ImageFunctionality = (
     link.href = canvasRef.current.toDataURL();
     link.click();
   };
- 
+
   useEffect(() => {
     if (!image) return;
 
-    const img = new Image();
-    img.src = image;
-    img.onload = () => {
-      if (canvasRef.current) {
-        const canvas = canvasRef.current;
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, img.width, img.height);
-        }
-      }
-    };
-  }, [image]);
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      console.log("Canvas is not yet rendered to the DOM");
+      return;
+    }
 
-  
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image(); // Create a new image object
+    img.src = `/dummyimages/${image.image}`; // Ensure the image src is correct
+
+    img.onload = () => {
+      // Clear the canvas before drawing the image
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw the image when it's loaded
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    };
+
+    img.onerror = (error) => {
+      console.error("Error loading image:", error);
+    };
+  }, [image, canvasRef]);
+
   return (
     <div className={styles.memeEditor}>
       <div
@@ -304,7 +315,12 @@ export const ImageFunctionality = (
           </ReactCrop>
         ) : (
           <>
-            <canvas ref={canvasRef} className={styles.memeCanvas} />
+            <canvas
+              ref={canvasRef}
+              className={styles.memeCanvas}
+              width={500}
+              height={500}
+            />
             {/* <img src={image.image} alt="Selected Image" className={styles.memeCanvas} /> */}
             {renderTextBoxes()}
           </>

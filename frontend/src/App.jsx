@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import {  useRef, useState } from "react";
 import Navbar from "./components/Navbar";
 import ImageInput from "./components/ImageInput";
 import { ImageFunctionality } from "./components/ImageFunctionality";
