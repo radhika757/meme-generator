@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import styles from "./ImageFunctionality.module.css";
 
 import ReactCrop from "react-image-crop";
@@ -11,9 +12,8 @@ import {
   Crop as CropIcon,
   Save,
 } from "lucide-react";
-import { useEffect, useRef } from "react";
 
-export const ImageFunctionality = (
+export const ImageFunctionality = ({
   image,
   setImage,
   crop,
@@ -33,12 +33,12 @@ export const ImageFunctionality = (
   fileName,
   setFileName,
   containerRef,
-  imgRef
-  //   canvasRef
-) => {
+  imgRef,
+}) => {
   const canvasRef = useRef(null);
 
-  const deleteImage = () => {
+
+  const handleDeleteImage = () => {
     setImage(null);
     setTextBoxes([]);
     setCrop(undefined);
@@ -278,8 +278,7 @@ export const ImageFunctionality = (
     if (!ctx) return;
 
     const img = new Image(); // Create a new image object
-    img.src = `/dummyimages/${image.image}`; // Ensure the image src is correct
-
+    img.src = `/dummyimages/${image}`; // Ensure the image src is correct
     img.onload = () => {
       // Clear the canvas before drawing the image
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -318,14 +317,17 @@ export const ImageFunctionality = (
             <canvas
               ref={canvasRef}
               className={styles.memeCanvas}
-              width={500}
-              height={500}
+              style={{ maxWidth: "100%", height: "auto", borderRadius: "4px" }}
+              width={400}
+              height={400}
             />
-            {/* <img src={image.image} alt="Selected Image" className={styles.memeCanvas} /> */}
             {renderTextBoxes()}
           </>
         )}
-        <button className={styles.deleteImageButton} onClick={deleteImage}>
+        <button
+          className={styles.deleteImageButton}
+          onClick={handleDeleteImage}
+        >
           <Trash2 className={styles.icon} />
         </button>
       </div>

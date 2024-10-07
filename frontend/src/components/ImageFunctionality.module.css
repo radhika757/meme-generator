@@ -10,6 +10,8 @@
 .imageContainer {
   position: relative;
   margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
 }
 
 .memeImage,
@@ -22,7 +24,7 @@
 .deleteImageButton {
   position: absolute;
   top: 0.5rem;
-  right: 0.5rem;
+  right: 31rem;
   background-color: #ff4136;
   color: white;
   border: none;

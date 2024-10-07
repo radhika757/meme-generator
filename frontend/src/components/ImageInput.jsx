@@ -2,38 +2,47 @@ import { useState, useEffect } from "react";
 import styles from "./ImageInput.module.css";
 
 import axios from "axios";
-import { Button, Input } from "antd";
+import { Button, Input, Spin } from "antd";
 
 const ImageInput = ({ setImage }) => {
-  const [suggestedImages, setSuggestedImages] = useState(null);
+  const [suggestedImages, setSuggestedImages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const limit = 6;
+
+  const fetchSuggestedImages = async () => {
+    try {
+      setLoading(true);
+      const result = await axios.get(
+        `http://localhost:3000/topSuggestedImages?limit=${limit}&offset=${offset}`
+      );
+      setSuggestedImages((prevImages) => [...prevImages, ...result.data]);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching suggested images:", err);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchSuggestedImages = async () => {
-      try {
-        const result = await axios.get(
-          "http://localhost:3000/topSuggestedImages"
-        );
-        setSuggestedImages(result.data);
-      } catch (err) {
-        console.error("Error fetching suggested images:", err);
-      }
-    };
-
     fetchSuggestedImages();
-  }, []);
+  }, [offset]);
 
   const onSelectFile = (e) => {
     if (e.target.files && e.target.files.length > 0) {
-      console.log(e.target);
-
       const reader = new FileReader();
       reader.addEventListener("load", () => setImage(reader.result));
       reader.readAsDataURL(e.target.files[0]);
     }
   };
 
-  const handleLoadMoreImages = () => {
-    //get more images from server
+  const handleLoadMoreImages = async () => {
+    if (!loading) {
+      setLoading(true);
+      setTimeout(() => {
+        setOffset((prevOffset) => prevOffset + limit); //Incrementing offset by 6
+      }, 500); // 500ms delay before updating offset
+    }
   };
 
   return (
@@ -63,7 +72,11 @@ const ImageInput = ({ setImage }) => {
             ))}
         </div>
         <div className={styles.loadMore}>
-          <Button onClick={handleLoadMoreImages}>Load More</Button>
+          {loading ? (
+            <Spin />
+          ) : (
+            <Button onClick={handleLoadMoreImages}>Load More</Button>
+          )}
         </div>
       </div>
     </div>
