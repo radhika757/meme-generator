@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+import { useEffect, useRef } from "react";
 import styles from "./ImageFunctionality.module.css";
 
 import ReactCrop from "react-image-crop";
@@ -11,9 +13,9 @@ import {
   Crop as CropIcon,
   Save,
 } from "lucide-react";
-import { useEffect } from "react";
+import Draggable from "react-draggable";
 
-export const ImageFunctionality = (
+export const ImageFunctionality = ({
   image,
   setImage,
   crop,
@@ -26,27 +28,28 @@ export const ImageFunctionality = (
   selectedTextBox,
   isCropping,
   setIsCropping,
-  isDragging,
-  setIsDragging,
-  dragStart,
-  setDragStart,
   fileName,
+  borderWidth,
+  setBorderWidth,
   setFileName,
   containerRef,
   imgRef,
-  canvasRef
-) => {
-  const deleteImage = () => {
+}) => {
+  const canvasRef = useRef(null);
+
+  const handleDeleteImage = () => {
     setImage(null);
     setTextBoxes([]);
     setCrop(undefined);
+    setBorderWidth(0);
+    setFileName(null);
   };
 
-  const handleMouseDown = (e, id) => {
-    setIsDragging(true);
-    setSelectedTextBox(id);
-    setDragStart({ x: e.clientX, y: e.clientY });
-  };
+//   const handleMouseDown = (e, id) => {
+//     setIsDragging(true);
+//     setSelectedTextBox(id);
+//     setDragStart({ x: e.clientX, y: e.clientY });
+//   };
 
   //   const handleMouseMove = (e) => {
   //     if (!isDragging || selectedTextBox === null) return
@@ -98,6 +101,11 @@ export const ImageFunctionality = (
     setSelectedTextBox(null);
   };
 
+  const handleSaveTextBox = () => {
+    // what to do after saving a text?
+    setSelectedTextBox(null)
+  };
+
   const applyCrop = () => {
     if (!imgRef.current || !crop) return;
 
@@ -140,16 +148,21 @@ export const ImageFunctionality = (
       return null;
     }
     return textBoxes.map((tb) => (
-      <div
-        key={tb.id}
-        className={`text-box ${selectedTextBox === tb.id ? "selected" : ""}`}
-        style={{ left: tb.x, top: tb.y }}
-        onMouseDown={(e) => handleMouseDown(e, tb.id)}
-      >
-        <p style={{ fontSize: `${tb.fontSize}px`, color: tb.color }}>
-          {tb.text}
-        </p>
-      </div>
+      <Draggable key={tb.id}>
+        {/* In react-draggable to modify the cursor e cn apply styles o the text container or the element  */}
+        <div
+          className={`textBox ${selectedTextBox === tb.id ? "selected" : ""}`}
+          style={{ left: tb.x, top: tb.y, position: "absolute" }}
+          //   onMouseDown={(e) => handleMouseDown(e, tb.id)}
+          onMouseEnter={(e) => (e.target.style.cursor = "grab")}
+          onMouseDown={(e) => (e.target.style.cursor = "grabbing")}
+          onMouseUp={(e) => (e.target.style.cursor = "grab")}
+        >
+          <p style={{ fontSize: `${tb.fontSize}px`, color: tb.color }}>
+            {tb.text}
+          </p>
+        </div>
+      </Draggable>
     ));
   };
 
@@ -262,7 +275,34 @@ export const ImageFunctionality = (
     link.href = canvasRef.current.toDataURL();
     link.click();
   };
- 
+
+  useEffect(() => {
+    if (!image) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      console.log("Canvas is not yet rendered to the DOM");
+      return;
+    }
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image(); // Create a new image object
+    img.src = `/dummyimages/${image}`; // Ensure the image src is correct
+    img.onload = () => {
+      // Clear the canvas before drawing the image
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw the image when it's loaded
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    };
+
+    img.onerror = (error) => {
+      console.error("Error loading image:", error);
+    };
+  }, [image, canvasRef]);
+
   useEffect(() => {
     if (!image) return;
 
@@ -271,17 +311,18 @@ export const ImageFunctionality = (
     img.onload = () => {
       if (canvasRef.current) {
         const canvas = canvasRef.current;
-        canvas.width = img.width;
-        canvas.height = img.height;
+        canvas.width = img.width + borderWidth * 2;
+        canvas.height = img.height + borderWidth * 2;
         const ctx = canvas.getContext("2d");
         if (ctx) {
-          ctx.drawImage(img, 0, 0, img.width, img.height);
+          ctx.fillStyle = "white";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, borderWidth, borderWidth, img.width, img.height);
         }
       }
     };
-  }, [image]);
+  }, [image, borderWidth]);
 
-  
   return (
     <div className={styles.memeEditor}>
       <div
@@ -304,15 +345,27 @@ export const ImageFunctionality = (
           </ReactCrop>
         ) : (
           <>
-            <canvas ref={canvasRef} className={styles.memeCanvas} />
-            {/* <img src={image.image} alt="Selected Image" className={styles.memeCanvas} /> */}
+            <canvas
+              ref={canvasRef}
+              className={styles.memeCanvas}
+              style={{ maxWidth: "100%", height: "auto", borderRadius: "4px" }}
+              width={400}
+              height={400}
+            />
             {renderTextBoxes()}
           </>
         )}
-        <button className={styles.deleteImageButton} onClick={deleteImage}>
+        <button
+          className={styles.deleteImageButton}
+          onClick={handleDeleteImage}
+        >
           <Trash2 className={styles.icon} />
         </button>
       </div>
+
+      {isAddingText && (
+        <p className={styles.helperText}>Click on the image to add text</p>
+      )}
 
       <div className={styles.editorControls}>
         <button
@@ -342,63 +395,93 @@ export const ImageFunctionality = (
           <Save className={styles.icon} />
           Save Edits
         </button>
-        {isAddingText && (
-          <p className={styles.helperText}>Click on the image to add text</p>
-        )}
       </div>
 
       {selectedTextBox !== null && (
-        <div className={styles.textEditor}>
-          <input
-            type="text"
-            // value={
-            //   textBoxes.find((tb) => tb.id === selectedTextBox)?.text || ""
-            // }
-            onChange={(e) =>
-              updateTextBox(selectedTextBox, { text: e.target.value })
-            }
-            placeholder="Enter text"
-            className={styles.textInput}
-          />
-          <div className={styles.fontSizeControl}>
-            <label className={styles.controlLabel}>
-              Font size:{" "}
-              {/* {textBoxes.find((tb) => tb.id === selectedTextBox)?.fontSize}px */}
-            </label>
-            <input
-              type="range"
-              min="10"
-              max="100"
-              step="1"
-              //   value={
-              //     textBoxes.find((tb) => tb.id === selectedTextBox)?.fontSize ||
-              //     20
-              //   }
-              onChange={(e) =>
-                updateTextBox(selectedTextBox, {
-                  fontSize: parseInt(e.target.value),
-                })
-              }
-              className={styles.slider}
-            />
+        <div className={styles.textEditorContainer}>
+          <div className={styles.textEditor}>
+            <div className={styles.textEditorBoxes}>
+              {/* <label>Input Text:</label> */}
+              <input
+                type="text"
+                value={
+                  textBoxes.find((tb) => tb.id === selectedTextBox)?.text || ""
+                }
+                onChange={(e) =>
+                  updateTextBox(selectedTextBox, { text: e.target.value })
+                }
+                placeholder="Enter text"
+                className={styles.textInput}
+              />
+              <div className={styles.fontSizeControl}>
+                <label className={styles.controlLabel}>
+                  Font size: &nbsp;
+                  {textBoxes.find((tb) => tb.id === selectedTextBox)?.fontSize}
+                  px
+                </label>
+                <input
+                  type="range"
+                  min="10"
+                  max="100"
+                  step="1"
+                  value={
+                    textBoxes.find((tb) => tb.id === selectedTextBox)
+                      ?.fontSize || 20
+                  }
+                  onChange={(e) =>
+                    updateTextBox(selectedTextBox, {
+                      fontSize: parseInt(e.target.value),
+                    })
+                  }
+                  className={styles.slider}
+                />
+              </div>
+            </div>
+
+            <div className={styles.colorPicker}>
+              <div className={styles.colorPickerBox}>
+                <label className={styles.controlLabel}>Text Color:</label>
+                <input
+                  type="color"
+                  value={
+                    textBoxes.find((tb) => tb.id === selectedTextBox)?.color
+                  }
+                  onChange={(e) =>
+                    updateTextBox(selectedTextBox, { color: e.target.value })
+                  }
+                  className={styles.colorInput}
+                />
+              </div>
+              <div className={styles.borderControl}>
+                <label htmlFor="border-width" className={styles.controlLabel}>
+                  Border Width: &nbsp;
+                  <span>{borderWidth}px</span>
+                </label>
+                <input
+                  id="border-width"
+                  type="range"
+                  min="0"
+                  max="50"
+                  value={borderWidth}
+                  onChange={(e) => setBorderWidth(parseInt(e.target.value))}
+                  className={styles.slider}
+                />
+              </div>
+            </div>
+            <button
+              className={styles.deleteTextButton}
+              onClick={() => deleteTextBox(selectedTextBox)}
+            >
+              Delete Text
+            </button>
+            <button
+              className={styles.saveTextButton}
+            //   onClick={() => handleSaveTextBox(selectedTextBox)}
+            onClick={handleSaveTextBox}
+            >
+              Save Text
+            </button>
           </div>
-          <div className={styles.colorPicker}>
-            <label className={styles.controlLabel}>Text Color:</label>
-            <input
-              type="color"
-              //   value={textBoxes.find((tb) => tb.id === selectedTextBox)?.color}
-              onChange={(e) =>
-                updateTextBox(selectedTextBox, { color: e.target.value })
-              }
-              className={styles.colorInput}
-            />
-          </div>
-          <button
-            className={styles.deleteTextButton}
-            onClick={() => deleteTextBox(selectedTextBox)}
-          >
-            Delete Text
-          </button>
         </div>
       )}
 
@@ -411,7 +494,7 @@ export const ImageFunctionality = (
           type="text"
           value={fileName}
           onChange={(e) => setFileName(e.target.value)}
-          placeholder="Enter file name"
+          placeholder="What would you like to name your file?"
           className={styles.textInput}
         />
       </div>

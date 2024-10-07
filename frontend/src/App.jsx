@@ -13,7 +13,8 @@ function App() {
   const [isCropping, setIsCropping] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [fileName, setFileName] = useState("my-meme");
+  const [fileName, setFileName] = useState(image ?? "my-meme");
+  const [borderWidth, setBorderWidth] = useState(0)
   const canvasRef = useRef(null);
   const imgRef = useRef(null);
   const containerRef = useRef(null);
@@ -42,6 +43,8 @@ function App() {
           setDragStart={setDragStart}
           fileName={fileName}
           setFileName={setFileName}
+          borderWidth={borderWidth}
+          setBorderWidth={setBorderWidth}
           containerRef={containerRef}
           imgRef={imgRef}
           canvasRef={canvasRef}

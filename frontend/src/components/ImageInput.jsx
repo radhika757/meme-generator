@@ -1,66 +1,49 @@
+/* eslint-disable react/prop-types */
+import { useState, useEffect } from "react";
 import styles from "./ImageInput.module.css";
-import cat from "../dummyimages/cat.jpeg";
-import child from "../dummyimages/child.jpeg";
-import duck from "../dummyimages/duck.jpeg";
-import exuse from "../dummyimages/excuseme.jpeg";
-import oops from "../dummyimages/oops.jpeg";
-import sadfrog from "../dummyimages/sadfrog.jpeg";
-import what from "../dummyimages/what.jpeg";
 
-import { Button, Input } from "antd";
+import axios from "axios";
+import { Button, Input, Spin } from "antd";
 
 const ImageInput = ({ setImage }) => {
-  //temp
-  const defaultImages = [
-    {
-      id: 1,
-      src: cat,
-      alt: "Default Image 1",
-    },
-    {
-      id: 2,
-      src: child,
-      alt: "Default Image 2",
-    },
-    {
-      id: 3,
-      src: duck,
-      alt: "Default Image 3",
-    },
-    {
-      id: 4,
-      src: exuse,
-      alt: "Default Image 4",
-    },
-    {
-      id: 5,
-      src: oops,
-      alt: "Default Image 4",
-    },
-    {
-      id: 6,
-      src: sadfrog,
-      alt: "Default Image 4",
-    },
-    {
-      id: 7,
-      src: what,
-      alt: "Default Image 4",
-    },
-  ];
+  const [suggestedImages, setSuggestedImages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const limit = 6;
+
+  const fetchSuggestedImages = async () => {
+    try {
+      setLoading(true);
+      const result = await axios.get(
+        `http://localhost:3000/topSuggestedImages?limit=${limit}&offset=${offset}`
+      );
+      setSuggestedImages((prevImages) => [...prevImages, ...result.data]);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching suggested images:", err);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSuggestedImages();
+  }, [offset]);
 
   const onSelectFile = (e) => {
     if (e.target.files && e.target.files.length > 0) {
-      console.log(e.target);
-
       const reader = new FileReader();
       reader.addEventListener("load", () => setImage(reader.result));
       reader.readAsDataURL(e.target.files[0]);
     }
   };
 
-  const handleLoadMoreImages = () => {
-    //get more images from server
+  const handleLoadMoreImages = async () => {
+    if (!loading) {
+      setLoading(true);
+      setTimeout(() => {
+        setOffset((prevOffset) => prevOffset + limit); //Incrementing offset by 6
+      }, 500); // 500ms delay before updating offset
+    }
   };
 
   return (
@@ -78,18 +61,23 @@ const ImageInput = ({ setImage }) => {
 
       <div className={styles.suggestedImages}>
         <div className={styles.allImages}>
-          {defaultImages.map((img) => (
-            <Button
-              key={img.id}
-              className={styles.images}
-              onClick={() => setImage(img.src)}
-            >
-              <img src={img.src} alt={img.alt} />
-            </Button>
-          ))}
+          {suggestedImages &&
+            Object.values(suggestedImages)?.map((img) => (
+              <Button
+                key={img.id}
+                className={styles.images}
+                onClick={() => setImage(img.imgName)}
+              >
+                <img src={`../dummyimages/${img.imgName}`} alt={img.imgName} />
+              </Button>
+            ))}
         </div>
         <div className={styles.loadMore}>
-          <Button onClick={handleLoadMoreImages}>Load More</Button>
+          {loading ? (
+            <Spin />
+          ) : (
+            <Button onClick={handleLoadMoreImages}>Load More</Button>
+          )}
         </div>
       </div>
     </div>
