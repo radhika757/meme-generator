@@ -1,15 +1,18 @@
-import  { useState } from 'react'
-
+import axios from "axios";
+import { useState } from "react";
 
 export default function Login() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     // Here you would typically handle the login logic
-    console.log('Login submitted', { name, email })
-  }
+    console.log("Login submitted", { name, email });
+    const result = axios.post("http://localhost:3000/login", { name, email });
+    console.log(result);
+    
+  };
 
   return (
     <div className="login-container">
@@ -139,5 +142,5 @@ export default function Login() {
         }
       `}</style>
     </div>
-  )
+  );
 }

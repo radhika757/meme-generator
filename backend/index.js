@@ -1,9 +1,14 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { body, validationResult } = require('express-validator');
 const multer = require('multer');
 const cors = require('cors');
 const passport = require('passport');
+const router = express.Router();
 
 const pool = require('./db');
+const { JWT_SECRET } = require('./utils/constants');
 
 const app = express();
 const PORT = 3000;
@@ -33,3 +38,58 @@ app.get('/topSuggestedImages', async (req, res) => {
 
     }
 })
+
+// Login Route 
+app.post('/login', [
+    body('email').isEmail().withMessage("Please enter a valid email"),
+    body('password').exists().withMessage("Name is required")
+],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const { email, password } = req.body;
+        try {
+            const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+            if (result.rowCount === 0) {
+                return res.status(400).json({ message: "Invalid Email Id" });
+            }
+
+            const user = result.rows[0];
+
+            // Check if password matches 
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ msg: 'Check your creds' });
+            }
+
+            // Generate JWT token 
+            const token = jwt.sign({
+                id: user.id,
+                email: user.email,
+                role: user.role
+            },
+                JWT_SECRET,
+                { expiresIn: '1h' }
+            );
+
+            // send response to client
+            res.json({
+                token,
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    role: user.role
+                }
+            });
+
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("Server Error");
+        }
+
+
+    }
+)
