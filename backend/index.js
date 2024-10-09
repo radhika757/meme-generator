@@ -5,16 +5,21 @@ const { body, validationResult } = require('express-validator');
 const multer = require('multer');
 const cors = require('cors');
 const passport = require('passport');
-const router = express.Router();
 
 const pool = require('./db');
 const { JWT_SECRET } = require('./utils/constants');
+const { uploadToS3 } = require('./aws');
+require('dotenv').config();
 
 const app = express();
 const PORT = 3000;
 
 app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
+
+// multer 
+const upload = multer({ dest: 'uploads/' });
+
 
 app.listen(PORT, () => {
     console.log("server is running on 3000");
@@ -89,7 +94,27 @@ app.post('/login', [
             console.log(err);
             res.status(500).send("Server Error");
         }
+    });
 
+// Route for Image uploads 
+app.post('/upload', upload.single('image'), async (req, res) => {
+    try {
+        const file = req.file;
+        console.log(file);
+        
+        if (!file) {
+            res.status(400).send({ message: "No file uploaded" });
+        }
 
-    }
-)
+        // Upload to S3
+        const uploadResult = await uploadToS3(file);
+        console.log(uploadResult);
+
+        // Respond with the file URL
+        res.status(200).json({ url: uploadResult.Location });
+
+    } catch (err) {
+        console.log(err, "Error uploading img to S3");
+        res.status(500).send('Error uploading file');
+    };
+})

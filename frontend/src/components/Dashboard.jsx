@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useState } from "react";
 
 const userTableData = [
@@ -27,6 +28,7 @@ export default function Dashboard() {
   const [newAdminPassword, setNewAdminPassword] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedImageTag, setSelectedImageTag] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState("");
 
   const handleCreateNewAdmin = (e) => {
     e.preventDefault();
@@ -40,10 +42,35 @@ export default function Dashboard() {
     setShowNewAdminForm(false);
   };
 
-  const handleCreateNewImages = (e) => {
+  const handleCreateNewImages = async (e) => {
     e.preventDefault();
     // function for inserting image in S3 bucket
+    if (!selectedImage) {
+      alert("Please select an image first");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", selectedImage);
+
+    // setUploading(true);
+
+    try {
+      const res = await axios.post("http://localhost:3001/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setPreviewUrl(res.data.url); // Set the preview to the S3 URL
+    } catch (err) {
+      console.error("Error uploading image: ", err);
+    } finally {
+      //   setUploading(false);
+      console("Uplaoded");
+    }
   };
+
   return (
     <div className="dashboard">
       <h1>Dashboard</h1>
@@ -164,6 +191,7 @@ export default function Dashboard() {
                 onChange={(e) => setSelectedImage(e.target.value)}
                 required
               />
+              {previewUrl && <img src={previewUrl} alt="Preview" width="300" />}
               <input
                 type="text"
                 placeholder="Enter tag for image"
