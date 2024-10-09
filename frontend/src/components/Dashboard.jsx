@@ -26,48 +26,60 @@ export default function Dashboard() {
   const [showNewImageForm, setShowNewImageForm] = useState(null);
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const [newAdminPassword, setNewAdminPassword] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState('');
   const [selectedImageTag, setSelectedImageTag] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState("");
 
   const handleCreateNewAdmin = (e) => {
     e.preventDefault();
     // Here you would typically handle creating a new admin
-    console.log("New admin created:", {
-      email: newAdminEmail,
-      password: newAdminPassword,
-    });
     setNewAdminEmail("");
     setNewAdminPassword("");
     setShowNewAdminForm(false);
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      setSelectedImage(file);
+    }
+  };
+
   const handleCreateNewImages = async (e) => {
     e.preventDefault();
-    // function for inserting image in S3 bucket
     if (!selectedImage) {
       alert("Please select an image first");
       return;
     }
-
-    const formData = new FormData();
-    formData.append("file", selectedImage);
-
-    // setUploading(true);
-
+ 
     try {
-      const res = await axios.post("http://localhost:3001/upload", formData, {
+      const fileName = selectedImage.name;
+      const fileType = selectedImage.type;
+      const res = await axios.get(
+        "http://localhost:3000/generate-presigned-url",
+        {
+          params: {
+            fileName,
+            fileType,
+          },
+        }
+      );
+     
+      const { url } = res.data;
+    
+      // Use the pre-signed URL to directly uplaod the file to S3
+      const uploadResult = await axios.put(url, selectedImage, {
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": fileType, // Make sure to set the correct content type
         },
       });
 
-      setPreviewUrl(res.data.url); // Set the preview to the S3 URL
+      if (uploadResult.status === 200) {
+        console.log(uploadResult);
+        // setFileUrl(url.split('?')[0]); // Get the S3 URL without query params
+      }
     } catch (err) {
       console.error("Error uploading image: ", err);
-    } finally {
-      //   setUploading(false);
-      console("Uplaoded");
     }
   };
 
@@ -187,11 +199,11 @@ export default function Dashboard() {
             <form onSubmit={handleCreateNewImages} className="new-admin-form">
               <input
                 type="file"
-                value={selectedImage}
-                onChange={(e) => setSelectedImage(e.target.value)}
+                accept="image/*"
+                // value={selectedImage}
+                onChange={handleFileChange}
                 required
               />
-              {previewUrl && <img src={previewUrl} alt="Preview" width="300" />}
               <input
                 type="text"
                 placeholder="Enter tag for image"

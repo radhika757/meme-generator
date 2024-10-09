@@ -8,7 +8,7 @@ const passport = require('passport');
 
 const pool = require('./db');
 const { JWT_SECRET } = require('./utils/constants');
-const { uploadToS3 } = require('./aws');
+const { uploadToS3, s3 } = require('./aws');
 require('dotenv').config();
 
 const app = express();
@@ -34,8 +34,6 @@ app.get('/topSuggestedImages', async (req, res) => {
     const offset = parseInt(req.query.offset) || 0;
     try {
         const result = await pool.query('SELECT * FROM "suggestedImages" ORDER BY id LIMIT $1 OFFSET $2', [limit, offset]);
-        console.log(result.rows);
-
         return res.status(200).json(result.rows);
     } catch (error) {
         console.log("Error while fetching top suggested image", error);
@@ -96,25 +94,24 @@ app.post('/login', [
         }
     });
 
-// Route for Image uploads 
-app.post('/upload', upload.single('image'), async (req, res) => {
-    try {
-        const file = req.file;
-        console.log(file);
-        
-        if (!file) {
-            res.status(400).send({ message: "No file uploaded" });
+// generate pre-signed URL
+app.get('/generate-presigned-url', (req, res) => {
+    const { fileName, fileType } = req.query;
+
+    const params = {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: fileName,
+        Expires: 60,                         // URL expiry time in seconds (e.g., 1 minute)
+        ContentType: fileType,
+        ACL: 'public-read',                  // Optional: public or private access
+    };
+
+    s3.getSignedUrl('putObject', params, (err, url) => {
+        if (err) {
+            console.error('Error generating pre-signed URL', err);
+            return res.status(500).send('Error generating pre-signed URL');
         }
 
-        // Upload to S3
-        const uploadResult = await uploadToS3(file);
-        console.log(uploadResult);
-
-        // Respond with the file URL
-        res.status(200).json({ url: uploadResult.Location });
-
-    } catch (err) {
-        console.log(err, "Error uploading img to S3");
-        res.status(500).send('Error uploading file');
-    };
+        res.json({ url }); // Send the URL to the frontend
+    })
 })

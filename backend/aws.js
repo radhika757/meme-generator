@@ -12,10 +12,10 @@ const s3 = new AWS.S3({
 
 // upload Images to S3 function 
 const uploadToS3 = (file) => {
-    console.log(file);
+    console.log(file,'fileupload');
     
     const fileStream = fs.createReadStream(file.path);
-    console.log(fileStream);
+    console.log(fileStream,'filestream');
     
     const params = {
         Bucket: process.env.AWS_BUCKET_NAME,
@@ -27,4 +27,4 @@ const uploadToS3 = (file) => {
     return s3.upload(params).promise();
 }
 
-module.exports = { uploadToS3 };
+module.exports = { uploadToS3, s3 };
