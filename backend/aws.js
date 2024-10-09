@@ -11,12 +11,8 @@ const s3 = new AWS.S3({
 })
 
 // upload Images to S3 function 
-const uploadToS3 = (file) => {
-    console.log(file,'fileupload');
-    
-    const fileStream = fs.createReadStream(file.path);
-    console.log(fileStream,'filestream');
-    
+const uploadToS3 = (file) => {  
+    const fileStream = fs.createReadStream(file.path);  
     const params = {
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: file.originalname, // File name you want to save as in S3

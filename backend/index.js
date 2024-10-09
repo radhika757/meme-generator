@@ -114,4 +114,21 @@ app.get('/generate-presigned-url', (req, res) => {
 
         res.json({ url }); // Send the URL to the frontend
     })
+});
+
+app.post('/upload-image', async (req, res) => {
+    const { imgName, tag, imgLink } = req.body;
+    console.log(imgName, tag, imgLink);
+
+    const query = `INSERT INTO "suggestedImages" ("imgName", "tag", "imgLink") VALUES ($1, $2, $3) RETURNING *`;
+    const values = [imgName, tag, imgLink];
+    try {
+        const result = await pool.query(query, values);
+        res.status(200).json({ message: "Image saved successfully", data: result.rows[0] });
+    } catch (err) {
+        console.log(err, "Error while uploading s3 link in db");
+        res.status(500).send("Error Error while uploading s3 link in db");
+
+    }
+
 })

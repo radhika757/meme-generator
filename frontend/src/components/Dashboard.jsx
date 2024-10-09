@@ -26,7 +26,7 @@ export default function Dashboard() {
   const [showNewImageForm, setShowNewImageForm] = useState(null);
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const [newAdminPassword, setNewAdminPassword] = useState("");
-  const [selectedImage, setSelectedImage] = useState('');
+  const [selectedImage, setSelectedImage] = useState("");
   const [selectedImageTag, setSelectedImageTag] = useState(null);
 
   const handleCreateNewAdmin = (e) => {
@@ -51,7 +51,7 @@ export default function Dashboard() {
       alert("Please select an image first");
       return;
     }
- 
+
     try {
       const fileName = selectedImage.name;
       const fileType = selectedImage.type;
@@ -64,14 +64,21 @@ export default function Dashboard() {
           },
         }
       );
-     
+
       const { url } = res.data;
-    
+
       // Use the pre-signed URL to directly uplaod the file to S3
       const uploadResult = await axios.put(url, selectedImage, {
         headers: {
           "Content-Type": fileType, // Make sure to set the correct content type
         },
+      });
+
+      // Upload the images in the db
+      await axios.post("http://localhost:3000/upload-image", {
+        imgName: fileName,
+        tag: selectedImageTag,
+        imgLink: url,
       });
 
       if (uploadResult.status === 200) {
@@ -223,6 +230,7 @@ export default function Dashboard() {
                 <th>Image Name</th>
                 <th>Image</th>
                 <th>Image Tag</th>
+                <th>Option</th>
               </tr>
             </thead>
             <tbody>
@@ -231,6 +239,7 @@ export default function Dashboard() {
                   <td>{img.img}</td>
                   <td>{img.name}</td>
                   <td>{img.tag}</td>
+                  <td>Delete Image</td>
                 </tr>
               ))}
             </tbody>
