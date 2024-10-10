@@ -7,7 +7,7 @@ const cors = require('cors');
 const passport = require('passport');
 
 const pool = require('./db');
-const { JWT_SECRET } = require('./utils/constants');
+const { JWT_SECRET, saltRounds } = require('./utils/constants');
 const { uploadToS3, s3 } = require('./aws');
 require('dotenv').config();
 
@@ -118,7 +118,6 @@ app.get('/generate-presigned-url', (req, res) => {
 
 app.post('/upload-image', async (req, res) => {
     const { imgName, tag, imgLink } = req.body;
-    console.log(imgName, tag, imgLink);
 
     const query = `INSERT INTO "suggestedImages" ("imgName", "tag", "imgLink") VALUES ($1, $2, $3) RETURNING *`;
     const values = [imgName, tag, imgLink];
@@ -130,5 +129,40 @@ app.post('/upload-image', async (req, res) => {
         res.status(500).send("Error Error while uploading s3 link in db");
 
     }
+})
 
+app.get('/get-images', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM "suggestedImages"');
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error fetching images:', error);
+        res.status(500).json({ error: 'Error fetching images from database' });
+    }
+});
+
+app.get('/get-all-admins', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT "email","role","name" FROM "users" WHERE "role" = $1', ['admin']);
+        res.json(result.rows);
+    } catch (err) {
+        console.log("Error fetching all admins", err);
+        res.status(500).json({ error: 'Error fetching admins from DB' });
+    }
+})
+
+app.post('/create-new-admin', async (req, res) => {
+    const { name, email, password, role } = req.body;
+   
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const query = 'INSERT INTO "users" ("email","role", "password","name") VALUES ($1,$2,$3,$4) RETURNING *';
+    const values = [email, role, hashedPassword, name];
+    try {
+        const result = await pool.query(query, values);
+        res.status(200).json({ message: "Admin created successfully", data: result.rows[0] });
+    } catch (err) {
+        console.log(err, "Error creating new admin");
+
+    }
 })

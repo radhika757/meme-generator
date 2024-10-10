@@ -1,5 +1,6 @@
 import axios from "axios";
-import { useState } from "react";
+import { Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const userTableData = [
   {
@@ -10,28 +11,32 @@ const userTableData = [
   },
 ];
 
-const adminTableData = [
-  { id: 1, email: "admin1@example.com", password: "********" },
-  { id: 2, email: "admin2@example.com", password: "********" },
-];
-
-const imagesTableData = [
-  { id: 1, name: "meme1.jpeg", img: "displayImg", tag: "meme" },
-  { id: 2, name: "funnycats.jpeg", img: "displayImg2", tag: "animals" },
-];
-
 export default function Dashboard() {
   const [view, setView] = useState("user");
   const [showNewAdminForm, setShowNewAdminForm] = useState(false);
   const [showNewImageForm, setShowNewImageForm] = useState(null);
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const [newAdminPassword, setNewAdminPassword] = useState("");
+  const [newAdminName, setNewAdminName] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
   const [selectedImageTag, setSelectedImageTag] = useState(null);
+  const [displayImages, setDisplayImages] = useState([]);
+  const [admins, setAdmins] = useState([]);
 
-  const handleCreateNewAdmin = (e) => {
+  const handleCreateNewAdmin = async (e) => {
     e.preventDefault();
-    // Here you would typically handle creating a new admin
+    try {
+      const res = await axios.post("http://localhost:3000/create-new-admin", {
+        name: newAdminName,
+        email: newAdminEmail,
+        password: newAdminPassword,
+        role: "admin",
+      });
+      setAdmins(res.data);
+    } catch (err) {
+      console.log("Error creating new admin", err);
+    }
+    setNewAdminName("");
     setNewAdminEmail("");
     setNewAdminPassword("");
     setShowNewAdminForm(false);
@@ -67,8 +72,8 @@ export default function Dashboard() {
 
       const { url } = res.data;
 
-      // Use the pre-signed URL to directly uplaod the file to S3
-      const uploadResult = await axios.put(url, selectedImage, {
+      // Use the pre-signed URL to directly upload the file to S3
+      await axios.put(url, selectedImage, {
         headers: {
           "Content-Type": fileType, // Make sure to set the correct content type
         },
@@ -80,16 +85,28 @@ export default function Dashboard() {
         tag: selectedImageTag,
         imgLink: url,
       });
-
-      if (uploadResult.status === 200) {
-        console.log(uploadResult);
-        // setFileUrl(url.split('?')[0]); // Get the S3 URL without query params
-      }
     } catch (err) {
       console.error("Error uploading image: ", err);
     }
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/get-images");
+        const adminData = await axios.get(
+          "http://localhost:3000/get-all-admins"
+        );
+        setAdmins(adminData.data);
+        setDisplayImages(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+  
   return (
     <div className="dashboard">
       <h1>Dashboard</h1>
@@ -156,6 +173,15 @@ export default function Dashboard() {
           {showNewAdminForm && (
             <form onSubmit={handleCreateNewAdmin} className="new-admin-form">
               <input
+                type="text"
+                placeholder="Name"
+                value={newAdminName}
+                onChange={(e) => {
+                  setNewAdminName(e.target.value);
+                }}
+                required
+              />
+              <input
                 type="email"
                 placeholder="Email"
                 value={newAdminEmail}
@@ -178,15 +204,17 @@ export default function Dashboard() {
           <table>
             <thead>
               <tr>
+                <th>Name</th>
                 <th>Email</th>
-                <th>Password</th>
+                <th>Role</th>
               </tr>
             </thead>
             <tbody>
-              {adminTableData.map((admin) => (
+              {admins.map((admin) => (
                 <tr key={admin.id}>
+                  <td>{admin.name}</td>
                   <td>{admin.email}</td>
-                  <td>{admin.password}</td>
+                  <td>{admin.role}</td>
                 </tr>
               ))}
             </tbody>
@@ -207,7 +235,6 @@ export default function Dashboard() {
               <input
                 type="file"
                 accept="image/*"
-                // value={selectedImage}
                 onChange={handleFileChange}
                 required
               />
@@ -227,19 +254,24 @@ export default function Dashboard() {
           <table>
             <thead>
               <tr>
-                <th>Image Name</th>
                 <th>Image</th>
+                <th>Image Name</th>
                 <th>Image Tag</th>
                 <th>Option</th>
               </tr>
             </thead>
             <tbody>
-              {imagesTableData.map((img) => (
+              {displayImages.map((img) => (
                 <tr key={img.id}>
-                  <td>{img.img}</td>
-                  <td>{img.name}</td>
+                  <td>
+                    <img src={img.imgLink} alt={img.imgName} width="100" />
+                  </td>
+                  <td>{img.imgName}</td>
                   <td>{img.tag}</td>
-                  <td>Delete Image</td>
+                  <td>
+                    {" "}
+                    <Trash2 className="icon" />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -248,6 +280,11 @@ export default function Dashboard() {
       )}
 
       <style>{`
+      .icon{
+       color: #ff4136;
+       cursor: pointer;
+      }
+
         .dashboard {
           font-family: Arial, sans-serif;
           max-width: 800px;
