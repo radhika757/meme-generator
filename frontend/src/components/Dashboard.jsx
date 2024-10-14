@@ -22,6 +22,7 @@ export default function Dashboard() {
   const [selectedImageTag, setSelectedImageTag] = useState(null);
   const [displayImages, setDisplayImages] = useState([]);
   const [admins, setAdmins] = useState([]);
+  const [allImages, setAllImages] = useState(false);
 
   const handleCreateNewAdmin = async (e) => {
     e.preventDefault();
@@ -42,6 +43,11 @@ export default function Dashboard() {
     setShowNewAdminForm(false);
   };
 
+  const handleCancelImagesForm = () =>{
+    setShowNewImageForm(false);
+    setSelectedImage("");
+    setSelectedImageTag("");
+  }
   const handleFileChange = (e) => {
     const file = e.target.files[0];
 
@@ -85,6 +91,10 @@ export default function Dashboard() {
         tag: selectedImageTag,
         imgLink: url,
       });
+      setAllImages(true);
+      setShowNewImageForm(false);
+      setSelectedImage("");
+      setSelectedImageTag("");
     } catch (err) {
       console.error("Error uploading image: ", err);
     }
@@ -105,7 +115,7 @@ export default function Dashboard() {
     };
 
     fetchData();
-  }, []);
+  }, [allImages]);
   
   return (
     <div className="dashboard">
@@ -246,7 +256,7 @@ export default function Dashboard() {
                 required
               />
               <button type="submit">Create</button>
-              <button type="button" onClick={() => setShowNewImageForm(false)}>
+              <button type="button" onClick={() => handleCancelImagesForm}>
                 Cancel
               </button>
             </form>

@@ -45,10 +45,12 @@ app.get('/topSuggestedImages', async (req, res) => {
 // Login Route 
 app.post('/login', [
     body('email').isEmail().withMessage("Please enter a valid email"),
-    body('password').exists().withMessage("Name is required")
+    body('password').exists().withMessage("Password is required")
 ],
     async (req, res) => {
-        const errors = validationResult(req);
+        console.log(req.body);
+
+        const errors = validationResult(req.body);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
@@ -143,7 +145,7 @@ app.get('/get-images', async (req, res) => {
 
 app.get('/get-all-admins', async (req, res) => {
     try {
-        const result = await pool.query('SELECT "email","role","name" FROM "users" WHERE "role" = $1', ['admin']);
+        const result = await pool.query('SELECT "email","role" FROM "users" WHERE "role" = $1', ['admin']);
         res.json(result.rows);
     } catch (err) {
         console.log("Error fetching all admins", err);
@@ -153,7 +155,7 @@ app.get('/get-all-admins', async (req, res) => {
 
 app.post('/create-new-admin', async (req, res) => {
     const { name, email, password, role } = req.body;
-   
+
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const query = 'INSERT INTO "users" ("email","role", "password","name") VALUES ($1,$2,$3,$4) RETURNING *';

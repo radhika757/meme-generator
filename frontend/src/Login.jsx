@@ -1,17 +1,25 @@
-import axios from "axios";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { useAuth } from "./context/AuthContext.jsx";
 
 export default function Login() {
-  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically handle the login logic
-    console.log("Login submitted", { name, email });
-    const result = axios.post("http://localhost:3000/login", { name, email });
-    console.log(result);
+    if (!password || !email) {
+      return false;
+    }
+    // login(email, password);
+    const success = await login(email, password);
     
+    if (success) {
+      navigate("/dashboard");
+    }
   };
 
   return (
@@ -21,24 +29,24 @@ export default function Login() {
         <p className="description">Please enter your details to log in</p>
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label htmlFor="name">Name</label>
+            <label htmlFor="email">Email</label>
             <input
-              id="name"
+              id="email"
               type="text"
-              placeholder="Enter your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
           <div className="input-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="password">Password</label>
             <input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
