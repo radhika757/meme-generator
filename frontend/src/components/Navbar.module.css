@@ -6,6 +6,8 @@
   background: linear-gradient(to right, #8a2be2, #ff69b4);
   padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content:space-evenly;
 }
 
 .navbarText {
@@ -13,4 +15,12 @@
   font-weight: bold;
   color: white;
   text-align: center;
+}
+
+.logout{
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.1);
+  color: white;
 }
