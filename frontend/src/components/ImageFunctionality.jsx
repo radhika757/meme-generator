@@ -29,6 +29,8 @@ export const ImageFunctionality = ({
   isCropping,
   setIsCropping,
   fileName,
+  saveEdit,
+  setSaveEdit,
   borderWidth,
   setBorderWidth,
   setFileName,
@@ -45,11 +47,11 @@ export const ImageFunctionality = ({
     setFileName(null);
   };
 
-//   const handleMouseDown = (e, id) => {
-//     setIsDragging(true);
-//     setSelectedTextBox(id);
-//     setDragStart({ x: e.clientX, y: e.clientY });
-//   };
+  //   const handleMouseDown = (e, id) => {
+  //     setIsDragging(true);
+  //     setSelectedTextBox(id);
+  //     setDragStart({ x: e.clientX, y: e.clientY });
+  //   };
 
   //   const handleMouseMove = (e) => {
   //     if (!isDragging || selectedTextBox === null) return
@@ -103,7 +105,7 @@ export const ImageFunctionality = ({
 
   const handleSaveTextBox = () => {
     // what to do after saving a text?
-    setSelectedTextBox(null)
+    setSelectedTextBox(null);
   };
 
   const applyCrop = () => {
@@ -167,6 +169,7 @@ export const ImageFunctionality = ({
   };
 
   const saveEdits = () => {
+    setSaveEdit(true);
     if (!canvasRef.current || !containerRef.current) return;
 
     const canvas = canvasRef.current;
@@ -342,6 +345,7 @@ export const ImageFunctionality = ({
               alt="Meme"
               className={styles.memeImage}
             />
+           
           </ReactCrop>
         ) : (
           <>
@@ -353,6 +357,7 @@ export const ImageFunctionality = ({
               height={400}
             />
             {renderTextBoxes()}
+            <span>{fileName}</span>
           </>
         )}
         <button
@@ -367,35 +372,37 @@ export const ImageFunctionality = ({
         <p className={styles.helperText}>Click on the image to add text</p>
       )}
 
-      <div className={styles.editorControls}>
-        <button
-          className={`${styles.controlButton} ${
-            isAddingText ? styles.active : ""
-          }`}
-          onClick={() => setIsAddingText(!isAddingText)}
-        >
-          <Type className={styles.icon} />
-          {isAddingText ? "Cancel" : "Add Text"}
-        </button>
-        <button
-          className={`${styles.controlButton} ${
-            isCropping ? styles.active : ""
-          }`}
-          onClick={() => setIsCropping(!isCropping)}
-        >
-          <CropIcon className={styles.icon} />
-          {isCropping ? "Cancel Crop" : "Crop Image"}
-        </button>
-        {isCropping && (
-          <button className={styles.controlButton} onClick={applyCrop}>
-            Apply Crop
+      {!saveEdit && (
+        <div className={styles.editorControls}>
+          <button
+            className={`${styles.controlButton} ${
+              isAddingText ? styles.active : ""
+            }`}
+            onClick={() => setIsAddingText(!isAddingText)}
+          >
+            <Type className={styles.icon} />
+            {isAddingText ? "Cancel" : "Add Text"}
           </button>
-        )}
-        <button className={styles.controlButton} onClick={saveEdits}>
-          <Save className={styles.icon} />
-          Save Edits
-        </button>
-      </div>
+          <button
+            className={`${styles.controlButton} ${
+              isCropping ? styles.active : ""
+            }`}
+            onClick={() => setIsCropping(!isCropping)}
+          >
+            <CropIcon className={styles.icon} />
+            {isCropping ? "Cancel Crop" : "Crop Image"}
+          </button>
+          {isCropping && (
+            <button className={styles.controlButton} onClick={applyCrop}>
+              Apply Crop
+            </button>
+          )}
+          <button className={styles.controlButton} onClick={saveEdits}>
+            <Save className={styles.icon} />
+            Save Edits
+          </button>
+        </div>
+      )}
 
       {selectedTextBox !== null && (
         <div className={styles.textEditorContainer}>
@@ -476,8 +483,8 @@ export const ImageFunctionality = ({
             </button>
             <button
               className={styles.saveTextButton}
-            //   onClick={() => handleSaveTextBox(selectedTextBox)}
-            onClick={handleSaveTextBox}
+              //   onClick={() => handleSaveTextBox(selectedTextBox)}
+              onClick={handleSaveTextBox}
             >
               Save Text
             </button>
@@ -485,19 +492,21 @@ export const ImageFunctionality = ({
         </div>
       )}
 
-      <div className={styles.fileNameInput}>
-        <label htmlFor="file-name" className={styles.controlLabel}>
-          File Name:
-        </label>
-        <input
-          id="file-name"
-          type="text"
-          value={fileName}
-          onChange={(e) => setFileName(e.target.value)}
-          placeholder="What would you like to name your file?"
-          className={styles.textInput}
-        />
-      </div>
+      {!saveEdit && (
+        <div className={styles.fileNameInput}>
+          <label htmlFor="file-name" className={styles.controlLabel}>
+            File Name:
+          </label>
+          <input
+            id="file-name"
+            type="text"
+            value={fileName}
+            onChange={(e) => setFileName(e.target.value)}
+            placeholder="What would you like to name your file?"
+            className={styles.textInput}
+          />
+        </div>
+      )}
 
       <div className={styles.actionButtons}>
         <button

@@ -115,13 +115,13 @@ export default function Dashboard() {
           className={view === "user" ? "active" : ""}
           onClick={() => setView("user")}
         >
-          User View
+          User Data
         </button>
         <button
           className={view === "admin" ? "active" : ""}
           onClick={() => setView("admin")}
         >
-          Admin View
+          All Users Login
         </button>
         <button
           className={view === "images" ? "active" : ""}
@@ -133,7 +133,7 @@ export default function Dashboard() {
 
       {view === "user" && (
         <div className="table-container">
-          <h2>User Table</h2>
+          <h2>User Data</h2>
           <table>
             <thead>
               <tr>
@@ -165,7 +165,7 @@ export default function Dashboard() {
       {view === "admin" && (
         <div className="table-container">
           <div className="admin-header">
-            <h2>Admin Table</h2>
+            <h2>All Logins</h2>
             <button onClick={() => setShowNewAdminForm(true)}>
               Create New Admin
             </button>

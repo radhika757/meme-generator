@@ -12,6 +12,7 @@ const MemeGenerator = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [fileName, setFileName] = useState(image ?? "my-meme");
+  const [saveEdit, setSaveEdit] = useState(false);
   const [borderWidth, setBorderWidth] = useState(0);
   const canvasRef = useRef(null);
   const imgRef = useRef(null);
@@ -44,6 +45,8 @@ const MemeGenerator = () => {
             setDragStart={setDragStart}
             fileName={fileName}
             setFileName={setFileName}
+            setSaveEdit={setSaveEdit}
+            saveEdit={saveEdit}
             borderWidth={borderWidth}
             setBorderWidth={setBorderWidth}
             containerRef={containerRef}
