@@ -2,7 +2,7 @@
 import axios from "axios";
 import { createContext, useState, useContext, useEffect } from "react";
 
-axios.defaults.withCredentials = true;
+axios.defaults.withCredentials = false;
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     checkAuth(); // Check authentication on component mount
-  }, []);
+  }, [user]);
 
   const isAuthenticated = !!user;
 

@@ -5,19 +5,25 @@ import styles from "./ImageInput.module.css";
 import axios from "axios";
 import { Button, Input, Spin } from "antd";
 
-const ImageInput = ({ setImage,saveEdit }) => {
+const ImageInput = ({ setImage, saveEdit }) => {
   const [suggestedImages, setSuggestedImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [offset, setOffset] = useState(0);
+  const [noMoreImages, setNoMoreImage] = useState(false);
   const limit = 6;
 
   const fetchSuggestedImages = async () => {
     try {
       setLoading(true);
+      setNoMoreImage(false);
       const result = await axios.get(
         `http://localhost:3000/topSuggestedImages?limit=${limit}&offset=${offset}`
       );
-      setSuggestedImages((prevImages) => [...prevImages, ...result.data]);
+      
+      if (result.data.hasmore === false) {
+        setNoMoreImage(true);
+      }
+      setSuggestedImages((prevImages) => [...prevImages, ...result.data.images]);
       setLoading(false);
     } catch (err) {
       console.error("Error fetching suggested images:", err);
@@ -80,6 +86,8 @@ const ImageInput = ({ setImage,saveEdit }) => {
             <div className={styles.loadMore}>
               {loading ? (
                 <Spin />
+              ) : noMoreImages ? (
+                <span>No More Suggested Images</span>
               ) : (
                 <Button onClick={handleLoadMoreImages}>Load More</Button>
               )}

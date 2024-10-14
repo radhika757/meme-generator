@@ -260,7 +260,6 @@ export const ImageFunctionality = ({
   const shareMeme = () => {
     if (!canvasRef.current) return;
     const memeUrl = canvasRef.current.toDataURL();
-    console.log(memeUrl);
     
     let shareUrl = "";
 

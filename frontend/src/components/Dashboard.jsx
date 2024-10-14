@@ -43,11 +43,11 @@ export default function Dashboard() {
     setShowNewAdminForm(false);
   };
 
-  const handleCancelImagesForm = () =>{
+  const handleCancelImagesForm = () => {
     setShowNewImageForm(false);
     setSelectedImage("");
     setSelectedImageTag("");
-  }
+  };
   const handleFileChange = (e) => {
     const file = e.target.files[0];
 
@@ -81,16 +81,20 @@ export default function Dashboard() {
       // Use the pre-signed URL to directly upload the file to S3
       await axios.put(url, selectedImage, {
         headers: {
-          "Content-Type": fileType, // Make sure to set the correct content type
+          "Content-Type": fileType,
+          "x-amz-acl": "public-read",
         },
       });
+
+      const publicUrl = `https://meme-generator-new.s3.ap-south-1.amazonaws.com/${fileName}`;
 
       // Upload the images in the db
       await axios.post("http://localhost:3000/upload-image", {
         imgName: fileName,
         tag: selectedImageTag,
-        imgLink: url,
+        imgLink: publicUrl,
       });
+
       setAllImages(true);
       setShowNewImageForm(false);
       setSelectedImage("");
@@ -98,6 +102,15 @@ export default function Dashboard() {
     } catch (err) {
       console.error("Error uploading image: ", err);
     }
+  };
+
+  const handleDeleteImage = async (id, name) => {
+    console.log(id,name);
+    const response = await axios.delete(`http://localhost:3000/delete-image/${id}`, {
+      data: { img: name },
+    });
+    console.log(response.data);
+    setAllImages(true);
   };
 
   useEffect(() => {
@@ -116,7 +129,7 @@ export default function Dashboard() {
 
     fetchData();
   }, [allImages]);
-  
+
   return (
     <div className="dashboard">
       <h1>Dashboard</h1>
@@ -280,7 +293,10 @@ export default function Dashboard() {
                   <td>{img.tag}</td>
                   <td>
                     {" "}
-                    <Trash2 className="icon" />
+                    <Trash2
+                      className="icon"
+                      onClick={() => handleDeleteImage(img.id, img.imgName)}
+                    />
                   </td>
                 </tr>
               ))}
