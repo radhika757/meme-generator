@@ -8,10 +8,11 @@ import { useAuth } from "./context/AuthContext";
 
 function App() {
   const { isAuthenticated } = useAuth();
+console.log(isAuthenticated);
 
   return (
     <BrowserRouter>
-      <Navbar />
+      <Navbar isAuthenticated={isAuthenticated} />
       <Routes>
         <Route path="/" element={<MemeGenerator />} />
         <Route path="/login" element={<Login />} />

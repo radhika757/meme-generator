@@ -16,10 +16,11 @@ export default function Login() {
     }
     // login(email, password);
     const success = await login(email, password);
-    
+       
     if (success) {
       navigate("/dashboard");
     }
+
   };
 
   return (

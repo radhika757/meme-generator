@@ -2,15 +2,14 @@
 import axios from "axios";
 import { createContext, useState, useContext } from "react";
 
+axios.defaults.withCredentials = true;
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    !!localStorage.getItem("token")
-  );
+
  
   const login = async (email, password) => {
     try {
@@ -21,11 +20,8 @@ export const AuthProvider = ({ children }) => {
 
       const user = await response.data;
 
-      // return;
-      if (user.token) {
+      if (user) {
         setUser({ email });
-        localStorage.setItem("token", user.token);
-        setIsAuthenticated(true);
         return true;
       } else {
         console.log("Login failed");
@@ -35,11 +31,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async() => {
     setUser(null);
-    localStorage.removeItem("token");
-    window.location.href = "/login"; // Redirect to login after logout
+    await axios.post("http://localhost:3000/logout");
   };
+
+  const isAuthenticated = !!user;
 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
