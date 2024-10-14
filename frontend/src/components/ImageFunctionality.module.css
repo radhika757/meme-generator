@@ -21,6 +21,11 @@
   border-radius: 4px;
 }
 
+.imageBlock{
+display: flex;
+flex-direction: column;
+}
+
 .deleteImageButton {
   position: absolute;
   top: 0.5rem;

@@ -4,8 +4,8 @@ import styles from "./ImageFunctionality.module.css";
 
 import ReactCrop from "react-image-crop";
 import {
-  Facebook,
-  Instagram,
+  // Facebook,
+  // Instagram,
   Download,
   Share2,
   Trash2,
@@ -14,6 +14,7 @@ import {
   Save,
 } from "lucide-react";
 import Draggable from "react-draggable";
+
 
 export const ImageFunctionality = ({
   image,
@@ -193,6 +194,17 @@ export const ImageFunctionality = ({
       // Update the image state with the new canvas content
       setImage(canvas.toDataURL());
     };
+
+    // const formData = new FormData();
+    // formData.append('file', img);
+    // const response = await axios.post('/uploadCustomImage', {
+    //   body: formData
+    // });
+
+    // const data = await response.json();
+    // const imageUrl = data.url;
+    // console.log(imageUrl);
+    
   };
 
   const generateMeme = async () => {
@@ -245,28 +257,16 @@ export const ImageFunctionality = ({
 
   // const memeDataUrl = canvas.toDataURL("image/png");
 
-  const shareMeme = (platform) => {
+  const shareMeme = () => {
     if (!canvasRef.current) return;
     const memeUrl = canvasRef.current.toDataURL();
+    console.log(memeUrl);
+    
     let shareUrl = "";
 
-    switch (platform) {
-      case "whatsapp":
-        shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(
-          "Check out this meme!"
-        )}&image=${encodeURIComponent(memeUrl)}`;
-        break;
-      case "instagram":
-        alert(
-          "To share on Instagram, save the image and upload it manually through the Instagram app."
-        );
-        return;
-      case "facebook":
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-          memeUrl
-        )}`;
-        break;
-    }
+    shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(
+      "Check out this meme!"
+    )}&image=${encodeURIComponent(memeUrl)}`;
 
     window.open(shareUrl, "_blank");
   };
@@ -326,6 +326,8 @@ export const ImageFunctionality = ({
     };
   }, [image, borderWidth]);
 
+  // get user selected img's URL
+
   return (
     <div className={styles.memeEditor}>
       <div
@@ -345,10 +347,9 @@ export const ImageFunctionality = ({
               alt="Meme"
               className={styles.memeImage}
             />
-           
           </ReactCrop>
         ) : (
-          <>
+          <div className={styles.imageBlock}>
             <canvas
               ref={canvasRef}
               className={styles.memeCanvas}
@@ -357,8 +358,12 @@ export const ImageFunctionality = ({
               height={400}
             />
             {renderTextBoxes()}
-            <span>{fileName}</span>
-          </>
+            {saveEdit ? (
+              <span style={{ textAlign: "center",paddingTop:"5px" }}>{fileName}.jpeg</span>
+            ) : (
+              <></>
+            )}
+          </div>
         )}
         <button
           className={styles.deleteImageButton}
@@ -522,12 +527,12 @@ export const ImageFunctionality = ({
           <Download className="icon" /> Download
         </button>
         <button
-          onClick={() => shareMeme("whatsapp")}
+          onClick={() => shareMeme()}
           className={`${styles.actionButton} ${styles.whatsapp}`}
         >
           <Share2 className="icon" /> WhatsApp
         </button>
-        <button
+        {/* <button
           onClick={() => shareMeme("instagram")}
           className={`${styles.actionButton} ${styles.instagram}`}
         >
@@ -538,7 +543,7 @@ export const ImageFunctionality = ({
           className={`${styles.actionButton} ${styles.facebook}`}
         >
           <Facebook className="icon" /> Facebook
-        </button>
+        </button> */}
       </div>
     </div>
   );

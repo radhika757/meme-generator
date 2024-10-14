@@ -100,15 +100,6 @@ app.post(
         sameSite: "strict",
       });
 
-      // send response to client
-      // res.json({
-      //     token,
-      //     user: {
-      //         id: user.id,
-      //         email: user.email,
-      //         role: user.role
-      //     }
-      // });
       return res.status(200).json({
         user: {
           email: user.email,

@@ -5,7 +5,7 @@ import styles from "./ImageInput.module.css";
 import axios from "axios";
 import { Button, Input, Spin } from "antd";
 
-const ImageInput = ({ setImage }) => {
+const ImageInput = ({ setImage,saveEdit }) => {
   const [suggestedImages, setSuggestedImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [offset, setOffset] = useState(0);
@@ -47,40 +47,49 @@ const ImageInput = ({ setImage }) => {
   };
 
   return (
-    <div className={styles.InputContainer}>
-      <label htmlFor="image-upload" className={styles.label}>
-        Select an Image:
-      </label>
-      <Input
-        id="image-upload"
-        type="file"
-        accept="image/*"
-        onChange={onSelectFile}
-        className={styles.input}
-      />
+    <>
+      {!saveEdit ? (
+        <div className={styles.InputContainer}>
+          <label htmlFor="image-upload" className={styles.label}>
+            Select an Image:
+          </label>
+          <Input
+            id="image-upload"
+            type="file"
+            accept="image/*"
+            onChange={onSelectFile}
+            className={styles.input}
+          />
 
-      <div className={styles.suggestedImages}>
-        <div className={styles.allImages}>
-          {suggestedImages &&
-            Object.values(suggestedImages)?.map((img) => (
-              <Button
-                key={img.id}
-                className={styles.images}
-                onClick={() => setImage(img.imgName)}
-              >
-                <img src={`../dummyimages/${img.imgName}`} alt={img.imgName} />
-              </Button>
-            ))}
+          <div className={styles.suggestedImages}>
+            <div className={styles.allImages}>
+              {suggestedImages &&
+                Object.values(suggestedImages)?.map((img) => (
+                  <Button
+                    key={img.id}
+                    className={styles.images}
+                    onClick={() => setImage(img.imgName)}
+                  >
+                    <img
+                      src={`../dummyimages/${img.imgName}`}
+                      alt={img.imgName}
+                    />
+                  </Button>
+                ))}
+            </div>
+            <div className={styles.loadMore}>
+              {loading ? (
+                <Spin />
+              ) : (
+                <Button onClick={handleLoadMoreImages}>Load More</Button>
+              )}
+            </div>
+          </div>
         </div>
-        <div className={styles.loadMore}>
-          {loading ? (
-            <Spin />
-          ) : (
-            <Button onClick={handleLoadMoreImages}>Load More</Button>
-          )}
-        </div>
-      </div>
-    </div>
+      ) : (
+        <></>
+      )}
+    </>
   );
 };
 
