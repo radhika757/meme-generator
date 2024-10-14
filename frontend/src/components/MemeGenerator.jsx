@@ -24,7 +24,7 @@ const MemeGenerator = () => {
         className="big-container"
         style={{ display: "flex", flexDirection: "column" }}
       >
-        <ImageInput setImage={setImage} />
+        <ImageInput setImage={setImage} saveEdit={saveEdit} />
         {image && (
           <ImageFunctionality
             image={image}
