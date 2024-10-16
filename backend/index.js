@@ -10,7 +10,7 @@ const passport = require("passport");
 
 const pool = require("./db");
 const { JWT_SECRET, saltRounds } = require("./utils/constants");
-const { uploadToS3, s3 } = require("./aws");
+const { uploadToS3, s3, deleteImageFromS3 } = require("./aws");
 require("dotenv").config();
 
 const app = express();
@@ -179,44 +179,53 @@ app.post("/upload-image", async (req, res) => {
     }
 });
 
-// delete a particular image
-app.delete("/delete-image/:id", async (req, res) => {
-    console.log(req.params);
 
-    const id = req.params.id;
-    const img = req.body.img;
-
-    console.log(id, img);
-
-    const params = {
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: img,
-    };
+const deleteImageFromDB = async (imageId) => {
+    const query = `DELETE FROM "suggestedImages" WHERE id = $1 RETURNING *`; // Adjust table/column names
+    const values = [imageId]; // The ID of the image to be deleted
 
     try {
-        await s3.deleteObject(params).promise()
-        const query = `DELETE FROM "suggestedImages" WHERE id = $1 RETURNING *`;
-        const values = [id];
-
         const res = await pool.query(query, values);
-        console.log(res.rows);
-
-        // if (res.rowCount > 0) {
-        //     console.log("Image record deleted from the database");
-        //     return res.send(200).message({ message: "Image deleted", image: res.rows[0] });
-        // } else {
-        //     console.log("No image found with the given ID");
-        //     return null;
-        // }
-
-    } catch (error) {
-        console.error("Error deleting the file from S3", error);
-        throw new Error("Failed to delete the file from S3");
+        if (res.rowCount > 0) {
+            console.log("Image record deleted from the database");
+            return res.rows[0];
+        } else {
+            console.log("No image found with the given ID");
+            return null;
+        }
+    } catch (err) {
+        console.error("Error deleting image from the database", err);
+        throw new Error("Failed to delete the image from the database");
     }
+};
 
+app.delete("/deleteImage/:id", async (req, res) => {
+    const imageId = req.params.id; // Get the image ID from the request
 
-})
+    try {
+        // First, fetch the image details from the DB to get the key (file name) in S3
+        const query = `SELECT * FROM "suggestedImages" WHERE id = $1 RETURNING *`;
+        const values = [imageId];
+        const result = await pool.query(query, values);
 
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Image not found" });
+        }
+
+        const imageKey = result.rows[0].imgName; // Assuming "imgName" column holds the file name in S3
+
+        // Delete the image from S3
+        await deleteImageFromS3(imageKey);
+
+        // Delete the image from the database
+        await deleteImageFromDB(imageId);
+
+        res.json({ message: "Image deleted successfully" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to delete image" });
+    }
+});
 
 app.get("/get-images", async (req, res) => {
     try {

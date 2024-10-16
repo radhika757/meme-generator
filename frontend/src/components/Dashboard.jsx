@@ -104,11 +104,8 @@ export default function Dashboard() {
     }
   };
 
-  const handleDeleteImage = async (id, name) => {
-    console.log(id,name);
-    const response = await axios.delete(`http://localhost:3000/delete-image/${id}`, {
-      data: { img: name },
-    });
+  const handleDeleteImage = async (id) => {
+    const response = await axios.delete(`http://localhost:3000/delete-image/${id}`);
     console.log(response.data);
     setAllImages(true);
   };
@@ -295,7 +292,7 @@ export default function Dashboard() {
                     {" "}
                     <Trash2
                       className="icon"
-                      onClick={() => handleDeleteImage(img.id, img.imgName)}
+                      onClick={() => handleDeleteImage(img.id)}
                     />
                   </td>
                 </tr>
